@@ -67,6 +67,7 @@ func init() {
 	GenerateCmd.MarkFlagRequired("src-dir")
 }
 
+// setPath sets a value in the nested map at the specified path.
 func setPath(tree map[string]any, path string, value any) {
 	parts := strings.Split(filepath.ToSlash(path), "/")
 	current := tree
