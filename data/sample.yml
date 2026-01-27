@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../yamlvfs.schema.json
+data/:
+src/:
+  version.txt: '1'
+  main.go:
+  utils.go: |
+    // util functions

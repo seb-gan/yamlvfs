@@ -1,0 +1,29 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://github.com/seb-gan/yamlvfs/yamlvfs.schema.json",
+    "title": "YAML VFS",
+    "description": "Virtual file system in YAML. Keys ending with '/' are directories, others are files.",
+    "$ref": "#/$defs/contents",
+    "$defs": {
+        "contents": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": {
+                "^[^<>:\"\\\\|?*\\x00-\\x1f]+/$": { "$ref": "#/$defs/directory" },
+                "^[^<>:\"\\\\|?*\\x00-\\x1f/]+$": { "$ref": "#/$defs/file" }
+            }
+        },
+        "directory": {
+            "title": "Directory",
+            "description": "Object, null, or empty string",
+            "if": { "type": "object" },
+            "then": { "$ref": "#/$defs/contents" },
+            "else": { "type": ["null", "string"], "maxLength": 0 }
+        },
+        "file": {
+            "title": "File",
+            "description": "String or null",
+            "type": ["string", "null"]
+        }
+    }
+}
