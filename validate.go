@@ -13,6 +13,7 @@ var schemaJSON string
 
 var schema *jsonschema.Schema
 
+// init initializes the JSON schema for validation.
 func init() {
 	doc, _ := jsonschema.UnmarshalJSON(strings.NewReader(schemaJSON))
 	c := jsonschema.NewCompiler()
@@ -20,7 +21,7 @@ func init() {
 	schema, _ = c.Compile("schema.json")
 }
 
-// Validate checks if the YAML content conforms to the YAML VFS schema.
+// Validate checks YAML content against the embedded yamlvfs schema.
 func Validate(content string) error {
 	var data any
 	if err := yaml.Unmarshal([]byte(content), &data); err != nil {
