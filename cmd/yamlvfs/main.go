@@ -10,11 +10,10 @@ import (
 func main() {
 	root := &cobra.Command{Use: "yamlvfs"}
 	root.AddCommand(
-		commands.NewValidateCmd(),
-		commands.NewPrintTreeCmd(),
-		commands.NewGenerateCmd(),
+		commands.ValidateCmd,
+		commands.PrintTreeCmd,
+		commands.GenerateCmd,
 	)
-
 	if err := root.Execute(); err != nil {
 		os.Exit(1)
 	}

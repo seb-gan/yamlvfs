@@ -11,62 +11,60 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func NewGenerateCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "generate",
-		Short: "Generate YAML VFS from directory",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			srcDir, _ := cmd.Flags().GetString("src-dir")
-			outFile, _ := cmd.Flags().GetString("out-file")
+var GenerateCmd = &cobra.Command{
+	Use:   "generate",
+	Short: "Generate YAML VFS from directory",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		srcDir, _ := cmd.Flags().GetString("src-dir")
+		outFile, _ := cmd.Flags().GetString("out-file")
 
-			tree := make(map[string]any)
-			err := filepath.WalkDir(srcDir, func(path string, d fs.DirEntry, err error) error {
+		tree := make(map[string]any)
+		err := filepath.WalkDir(srcDir, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+
+			rel, _ := filepath.Rel(srcDir, path)
+			if rel == "." {
+				return nil
+			}
+
+			if d.IsDir() {
+				setPath(tree, rel+"/", nil)
+			} else {
+				content, err := os.ReadFile(path)
 				if err != nil {
 					return err
 				}
-
-				rel, _ := filepath.Rel(srcDir, path)
-				if rel == "." {
-					return nil
-				}
-
-				if d.IsDir() {
-					setPath(tree, rel+"/", nil)
-				} else {
-					content, err := os.ReadFile(path)
-					if err != nil {
-						return err
-					}
-					setPath(tree, rel, string(content))
-				}
-
-				return nil
-			})
-
-			if err != nil {
-				return err
-			}
-
-			out, err := yaml.Marshal(tree)
-			if err != nil {
-				return err
-			}
-
-			if outFile == "" {
-				fmt.Print(string(out))
-			} else {
-				return os.WriteFile(outFile, out, 0644)
+				setPath(tree, rel, string(content))
 			}
 
 			return nil
-		},
-	}
+		})
 
-	cmd.Flags().String("src-dir", "", "Source directory")
-	cmd.Flags().String("out-file", "", "Output file (stdout if not specified)")
-	cmd.MarkFlagRequired("src-dir")
+		if err != nil {
+			return err
+		}
 
-	return cmd
+		out, err := yaml.Marshal(tree)
+		if err != nil {
+			return err
+		}
+
+		if outFile == "" {
+			fmt.Print(string(out))
+		} else {
+			return os.WriteFile(outFile, out, 0644)
+		}
+
+		return nil
+	},
+}
+
+func init() {
+	GenerateCmd.Flags().String("src-dir", "", "Source directory")
+	GenerateCmd.Flags().String("out-file", "", "Output file (stdout if not specified)")
+	GenerateCmd.MarkFlagRequired("src-dir")
 }
 
 func setPath(tree map[string]any, path string, value any) {
