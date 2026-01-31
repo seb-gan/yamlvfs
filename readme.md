@@ -60,9 +60,44 @@ entries, _ := fs.ReadDir(fsys, "src")
 ```bash
 go install github.com/seb-gan/yamlvfs/cmd/yamlvfs@latest
 
-yamlvfs generate --dir ./my-dir --out-file my-dir.yml
-yamlvfs print-tree --file my-dir.yml
-yamlvfs validate --file my-dir.yml
+yamlvfs
+    import-dir # creates yamlvfs document matching directory
+        --src-dir <directory>
+            # source directory to recursively scan
+        [--depth <int>]
+            # max depth to scan, default unlimited
+        [--out-file <string>]
+            # if specified, put yamlvfs in file, else print to stdout
+        [--include-file-content <comma separated globs>] default "*"
+            # include content for files matching these globs
+        [--include-dirs <comma separated globs>] default "*"
+            # include directories matching these globs
+        [--exclude-dirs <comma separated globs>] default ""
+            # exclude directories matching these globs
+        [--no-gitignore <bool>] default false
+            # When true, read .gitignore in each dir, add to exclusion list going deeper
+
+    write-dir # creates directory and file structure from yamlvfs file
+        --src-file <yamlvfs file>
+            # source yamlvfs file
+        --dest-dir <directory>
+            # destination directory to create structure in
+
+    print-tree # prints tree structure of yamlvfs file
+        --src-file <string>
+            # source yamlvfs file
+
+    validate # validates yamlvfs file structure against embedded schema
+        --src-file <string>
+            # source yamlvfs file
+
+    schema
+        export # Exports the embedded schema to file or stdout
+            --dest-dir <string> Default ""
+                # if specified, write schema with its default filename to this directory
+            [--dest-file <string> ]
+                # if specified, write schema to this file
+        print # Prints schema to stdout
 ```
 
 ## License
