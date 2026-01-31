@@ -23,6 +23,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// FS is a filesystem created from a yamlvfs Document.
+type FS = fs.FS
+
+// Document is a yamlvfs-formatted YAML string.
+type Document = string
+
 // Load parses and validates YAML content, returning an [fs.FS].
 func Load(content string) (fs.FS, error) {
 	if err := Validate(content); err != nil {

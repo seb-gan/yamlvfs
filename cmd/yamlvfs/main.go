@@ -3,17 +3,23 @@ package main
 import (
 	"os"
 
-	"github.com/seb-gan/yamlvfs/internal/commands"
 	"github.com/spf13/cobra"
 )
 
 func main() {
-	root := &cobra.Command{Use: "yamlvfs"}
+	root := &cobra.Command{
+		Use:   "yamlvfs",
+		Short: "Work with yamlvfs YAML filesystems",
+	}
+
 	root.AddCommand(
-		commands.ValidateCmd,
-		commands.PrintTreeCmd,
-		commands.GenerateCmd,
+		importDirCmd,
+		writeDirCmd,
+		printTreeCmd,
+		validateCmd,
+		schemaCmd,
 	)
+
 	if err := root.Execute(); err != nil {
 		os.Exit(1)
 	}
