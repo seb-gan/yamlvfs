@@ -12,7 +12,16 @@ import (
 var importDirCmd = &cobra.Command{
 	Use:   "import-dir",
 	Short: "Create yamlvfs document from directory",
-	RunE:  runImportDir,
+	Long: `Create a yamlvfs document from a directory tree.
+
+Flag notes:
+  --include-dirs and --exclude-dirs can be combined; a directory must match include and not match exclude.
+  --include-file-content controls which files have their content included; others are listed with empty content.
+  By default, .gitignore files are respected and cumulative; use --no-gitignore to disable. The .git directory is always excluded.
+  Hidden files and directories (names starting with .) are included by default unless excluded by .gitignore or --exclude-dirs.
+`,
+	Example: "  yamlvfs import-dir --src-dir mydir --out-file fs.yml\n  yamlvfs import-dir --src-dir . --include-file-content=*.go --exclude-dirs=test\n  yamlvfs import-dir --src-dir . --no-gitignore",
+	RunE:    runImportDir,
 }
 
 func init() {

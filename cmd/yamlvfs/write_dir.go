@@ -7,8 +7,11 @@ import (
 
 var writeDirCmd = &cobra.Command{
 	Use:   "write-dir",
-	Short: "Write yamlvfs document to directory",
-	RunE:  runWriteDir,
+	Short: "Create directory and file structure from yamlvfs file",
+	Long:  `Create a directory and file structure from a yamlvfs document.`,
+
+	Example: "  yamlvfs write-dir --src-file fs.yml --dest-dir out",
+	RunE:    runWriteDir,
 }
 
 func init() {

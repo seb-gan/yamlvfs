@@ -11,9 +11,11 @@ import (
 )
 
 var printTreeCmd = &cobra.Command{
-	Use:   "print-tree",
-	Short: "Print tree of yamlvfs document",
-	RunE:  runPrintTree,
+	Use:     "print-tree",
+	Short:   "Print tree structure of yamlvfs file",
+	Long:    `Print the tree structure of a yamlvfs document.`,
+	Example: "  yamlvfs print-tree --src-file fs.yml",
+	RunE:    runPrintTree,
 }
 
 func init() {

@@ -9,9 +9,11 @@ import (
 )
 
 var validateCmd = &cobra.Command{
-	Use:   "validate",
-	Short: "Validate a yamlvfs document",
-	RunE:  runValidate,
+	Use:     "validate",
+	Short:   "Validate yamlvfs file structure",
+	Long:    `Validate a yamlvfs document against the embedded schema.`,
+	Example: "  yamlvfs validate --src-file fs.yml",
+	RunE:    runValidate,
 }
 
 func init() {
