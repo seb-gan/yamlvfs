@@ -52,7 +52,21 @@ func ReadDir(fsys fs.FS, opts *ReadDirOptions) (Document, error) {
 	}
 
 	tree := make(map[string]any)
-	var gi *gitignore
+
+	// Track gitignore per directory
+	gitignores := make(map[string]*gitignore)
+	if opts.RespectGitignore {
+		gitignores["."] = newGitignore(fsys, ".")
+	}
+
+	// getGitignore returns the gitignore for a path's parent directory
+	getGitignore := func(p string) *gitignore {
+		dir := filepath.Dir(p)
+		if dir == "." {
+			return gitignores["."]
+		}
+		return gitignores[filepath.ToSlash(dir)]
+	}
 
 	err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -61,9 +75,6 @@ func ReadDir(fsys fs.FS, opts *ReadDirOptions) (Document, error) {
 
 		// Skip root
 		if path == "." {
-			if opts.RespectGitignore {
-				gi = newGitignore(fsys, ".")
-			}
 			return nil
 		}
 
@@ -82,11 +93,14 @@ func ReadDir(fsys fs.FS, opts *ReadDirOptions) (Document, error) {
 		}
 
 		// Handle gitignore
-		if opts.RespectGitignore && gi != nil && gi.matches(path, d.IsDir()) {
-			if d.IsDir() {
-				return fs.SkipDir
+		if opts.RespectGitignore {
+			gi := getGitignore(path)
+			if gi != nil && gi.matches(path, d.IsDir()) {
+				if d.IsDir() {
+					return fs.SkipDir
+				}
+				return nil
 			}
-			return nil
 		}
 
 		if d.IsDir() {
@@ -95,9 +109,10 @@ func ReadDir(fsys fs.FS, opts *ReadDirOptions) (Document, error) {
 				return fs.SkipDir
 			}
 
-			// Load gitignore for this directory
+			// Create gitignore for this directory
 			if opts.RespectGitignore {
-				gi = gi.child(path)
+				parent := getGitignore(path)
+				gitignores[filepath.ToSlash(path)] = parent.child(path)
 			}
 
 			setPath(tree, path+"/", nil)
