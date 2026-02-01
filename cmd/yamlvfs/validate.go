@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/seb-gan/yamlvfs"
 	"github.com/spf13/cobra"
@@ -11,7 +10,6 @@ import (
 var validateCmd = &cobra.Command{
 	Use:     "validate",
 	Short:   "Validate yamlvfs file structure",
-	Long:    `Validate a yamlvfs document against the embedded schema.`,
 	Example: "  yamlvfs validate --src-file fs.yml",
 	RunE:    runValidate,
 }
@@ -25,12 +23,12 @@ func init() {
 func runValidate(cmd *cobra.Command, args []string) error {
 	srcFile, _ := cmd.Flags().GetString("src-file")
 
-	data, err := os.ReadFile(srcFile)
+	node, err := yamlvfs.ParseFile(srcFile)
 	if err != nil {
 		return err
 	}
 
-	if err := yamlvfs.Validate(yamlvfs.Document(data)); err != nil {
+	if err := yamlvfs.Validate(node); err != nil {
 		return err
 	}
 

@@ -20,15 +20,15 @@ func init() {
 	schema, _ = c.Compile("schema.json")
 }
 
-// Schema returns the embedded JSON schema for yamlvfs documents.
-func Schema() Document {
+// Schema returns the embedded JSON schema.
+func Schema() string {
 	return schemaJSON
 }
 
-// Validate checks a Document against the yamlvfs JSON schema.
-func Validate(doc Document) error {
+// Validate checks a yaml.Node against the yamlvfs schema.
+func Validate(node *yaml.Node) error {
 	var data any
-	if err := yaml.Unmarshal([]byte(doc), &data); err != nil {
+	if err := node.Decode(&data); err != nil {
 		return err
 	}
 	return schema.Validate(data)

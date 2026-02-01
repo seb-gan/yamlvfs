@@ -27,28 +27,22 @@ src/:
 
 ## Go Library
 
-**Usage:**
-
 ```bash
 go get github.com/seb-gan/yamlvfs
 ```
 
 ```go
-// load from file
-fsys, _ := yamlvfs.LoadFile("data/sample.yml")
+// Parse YAML, open as filesystem
+node, _ := yamlvfs.ParseFile("data/sample.yml")
+fsys, _ := yamlvfs.Open(node)
 
-// load from string
-fsys, _ := yamlvfs.Load(`
-config.yml: |
-  name: myapp
-src/:
-  main.go: |
-    package main
-`)
-
-// use standard fs.FS implementation
+// Use standard fs.FS
 data, _ := fs.ReadFile(fsys, "config.yml")
 entries, _ := fs.ReadDir(fsys, "src")
+
+// Capture filesystem to YAML
+node, _ := yamlvfs.FromFS(os.DirFS("."), nil)
+yaml := yamlvfs.Format(node)
 ```
 
 ## CLI

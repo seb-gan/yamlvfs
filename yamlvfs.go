@@ -1,20 +1,11 @@
-// Package yamlvfs loads YAML documents as [fs.FS] implementations.
+// Package yamlvfs provides a YAML-based virtual filesystem.
 //
-// Keys ending with "/" are directories; all others are files.
-// Directories may optionally contain nested files or directories.
-// Files may optionally contain (multi-line) string content.
-//
-// Example YAML structure:
-//
-//	src/:
-//	  main.go: |
-//	    package main
-//	config.yml: |
-//	  name: myapp
+// A yamlvfs document is a YAML mapping where each key represents a file or directory.
+// Keys ending with "/" are directories; values are either null or nested mappings.
+// Other keys are files; values are either null or string content.
 package yamlvfs
 
 import (
-	"fmt"
 	"io/fs"
 	"os"
 	"strings"
@@ -23,21 +14,33 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// FS is a filesystem created from a yamlvfs Document.
-type FS = fs.FS
+// Parse parses YAML text into a yaml.Node.
+func Parse(s string) (*yaml.Node, error) {
+	var node yaml.Node
+	if err := yaml.Unmarshal([]byte(s), &node); err != nil {
+		return nil, err
+	}
+	return &node, nil
+}
 
-// Document is a yamlvfs-formatted YAML string.
-type Document = string
+// ParseFile parses a YAML file into a yaml.Node.
+func ParseFile(path string) (*yaml.Node, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return Parse(string(data))
+}
 
-// Load parses and validates YAML content, returning an [fs.FS].
-func Load(content string) (fs.FS, error) {
-	if err := Validate(content); err != nil {
+// Open converts a yaml.Node to an fs.FS.
+func Open(node *yaml.Node) (fs.FS, error) {
+	if err := Validate(node); err != nil {
 		return nil, err
 	}
 
 	var tree map[string]any
-	if err := yaml.Unmarshal([]byte(content), &tree); err != nil {
-		return nil, fmt.Errorf("yamlvfs: failed to parse YAML: %w", err)
+	if err := node.Decode(&tree); err != nil {
+		return nil, err
 	}
 
 	fsys := make(fstest.MapFS)
@@ -45,16 +48,45 @@ func Load(content string) (fs.FS, error) {
 	return fsys, nil
 }
 
-// LoadFile parses and validates YAML content from a file, returning an [fs.FS].
-func LoadFile(path string) (fs.FS, error) {
-	data, err := os.ReadFile(path)
+// Format converts a yaml.Node to YAML text.
+// Null values are formatted as implicit (key:) rather than explicit (key: null).
+func Format(node *yaml.Node) string {
+	out, err := yaml.Marshal(node)
 	if err != nil {
-		return nil, fmt.Errorf("yamlvfs: failed to read file: %w", err)
+		return ""
 	}
-	return Load(string(data))
+	return strings.ReplaceAll(string(out), ": null\n", ":\n")
 }
 
-// flatten recursively flattens a nested map into fstest.MapFS.
+// WriteDir writes an fs.FS to disk at destDir.
+func WriteDir(fsys fs.FS, destDir string) error {
+	return fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		dest := destDir + "/" + path
+		if d.IsDir() {
+			return os.MkdirAll(dest, 0755)
+		}
+		data, err := fs.ReadFile(fsys, path)
+		if err != nil {
+			return err
+		}
+		if err := os.MkdirAll(destDir+"/"+dirOf(path), 0755); err != nil {
+			return err
+		}
+		return os.WriteFile(dest, data, 0644)
+	})
+}
+
+func dirOf(path string) string {
+	if i := strings.LastIndex(path, "/"); i >= 0 {
+		return path[:i]
+	}
+	return "."
+}
+
+// flatten recursively converts a nested map to fstest.MapFS.
 func flatten(fsys fstest.MapFS, prefix string, tree map[string]any) {
 	for key, value := range tree {
 		isDir := strings.HasSuffix(key, "/")

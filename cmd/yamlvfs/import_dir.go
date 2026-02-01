@@ -18,9 +18,8 @@ Flag notes:
   --include-dirs and --exclude-dirs can be combined; a directory must match include and not match exclude.
   --include-file-content controls which files have their content included; others are listed with empty content.
   By default, .gitignore files are respected and cumulative; use --no-gitignore to disable. The .git directory is always excluded.
-  Hidden files and directories (names starting with .) are included by default unless excluded by .gitignore or --exclude-dirs.
 `,
-	Example: "  yamlvfs import-dir --src-dir mydir --out-file fs.yml\n  yamlvfs import-dir --src-dir . --include-file-content=*.go --exclude-dirs=test\n  yamlvfs import-dir --src-dir . --no-gitignore",
+	Example: "  yamlvfs import-dir --src-dir mydir --out-file fs.yml",
 	RunE:    runImportDir,
 }
 
@@ -45,7 +44,7 @@ func runImportDir(cmd *cobra.Command, args []string) error {
 	excludeDirs, _ := cmd.Flags().GetString("exclude-dirs")
 	noGitignore, _ := cmd.Flags().GetBool("no-gitignore")
 
-	opts := &yamlvfs.ReadDirOptions{
+	opts := &yamlvfs.Options{
 		Depth:              depth,
 		IncludeFileContent: parseGlobs(includeContent),
 		IncludeDirs:        parseGlobs(includeDirs),
@@ -53,15 +52,17 @@ func runImportDir(cmd *cobra.Command, args []string) error {
 		RespectGitignore:   !noGitignore,
 	}
 
-	doc, err := yamlvfs.ReadDir(os.DirFS(srcDir), opts)
+	node, err := yamlvfs.FromFS(os.DirFS(srcDir), opts)
 	if err != nil {
 		return err
 	}
 
+	output := yamlvfs.Format(node)
+
 	if outFile == "" {
-		fmt.Print(doc)
+		fmt.Print(output)
 	} else {
-		if err := os.WriteFile(outFile, []byte(doc), 0644); err != nil {
+		if err := os.WriteFile(outFile, []byte(output), 0644); err != nil {
 			return err
 		}
 	}
@@ -69,7 +70,6 @@ func runImportDir(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// parseGlobs splits a comma-separated string into glob patterns.
 func parseGlobs(s string) []string {
 	if s == "" {
 		return nil

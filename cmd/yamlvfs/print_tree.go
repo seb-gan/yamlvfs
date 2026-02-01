@@ -13,7 +13,6 @@ import (
 var printTreeCmd = &cobra.Command{
 	Use:     "print-tree",
 	Short:   "Print tree structure of yamlvfs file",
-	Long:    `Print the tree structure of a yamlvfs document.`,
 	Example: "  yamlvfs print-tree --src-file fs.yml",
 	RunE:    runPrintTree,
 }
@@ -27,7 +26,12 @@ func init() {
 func runPrintTree(cmd *cobra.Command, args []string) error {
 	srcFile, _ := cmd.Flags().GetString("src-file")
 
-	fsys, err := yamlvfs.LoadFile(srcFile)
+	node, err := yamlvfs.ParseFile(srcFile)
+	if err != nil {
+		return err
+	}
+
+	fsys, err := yamlvfs.Open(node)
 	if err != nil {
 		return err
 	}
@@ -36,7 +40,6 @@ func runPrintTree(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-
 		indent := strings.Repeat("  ", strings.Count(path, "/"))
 		name := filepath.Base(path)
 		if d.IsDir() {
