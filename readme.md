@@ -60,44 +60,82 @@ entries, _ := fs.ReadDir(fsys, "src")
 ```bash
 go install github.com/seb-gan/yamlvfs/cmd/yamlvfs@latest
 
+yamlvfs --help-all
+```
+
+```
+yamlvfs - Work with yamlvfs YAML filesystems
+
+yamlvfs is a CLI for working with YAML-defined virtual filesystems.
+
+See https://github.com/seb-gan/yamlvfs for more information.
+
+Usage:
+
 yamlvfs
-    import-dir # creates yamlvfs document matching directory
-        --src-dir <directory>
-            # source directory to recursively scan
-        [--depth <int>]
-            # max depth to scan, default unlimited
-        [--out-file <string>]
-            # if specified, put yamlvfs in file, else print to stdout
-        [--include-file-content <comma separated globs>] default "*"
-            # include content for files matching these globs
-        [--include-dirs <comma separated globs>] default "*"
-            # include directories matching these globs
-        [--exclude-dirs <comma separated globs>] default ""
-            # exclude directories matching these globs
-        [--no-gitignore <bool>] default false
-            # When true, read .gitignore in each dir, add to exclusion list going deeper
 
-    write-dir # creates directory and file structure from yamlvfs file
-        --src-file <yamlvfs file>
-            # source yamlvfs file
-        --dest-dir <directory>
-            # destination directory to create structure in
+    completion  # Generate the autocompletion script for the specified shell
 
-    print-tree # prints tree structure of yamlvfs file
-        --src-file <string>
-            # source yamlvfs file
+        bash  # Generate the autocompletion script for bash
+            [--no-descriptions <bool>]  # disable completion descriptions  (default: false)
 
-    validate # validates yamlvfs file structure against embedded schema
-        --src-file <string>
-            # source yamlvfs file
+        fish  # Generate the autocompletion script for fish
+            [--no-descriptions <bool>]  # disable completion descriptions  (default: false)
 
-    schema
-        export # Exports the embedded schema to file or stdout
-            --dest-dir <string> Default ""
-                # if specified, write schema with its default filename to this directory
-            [--dest-file <string> ]
-                # if specified, write schema to this file
-        print # Prints schema to stdout
+        powershell  # Generate the autocompletion script for powershell
+            [--no-descriptions <bool>]  # disable completion descriptions  (default: false)
+
+        zsh  # Generate the autocompletion script for zsh
+            [--no-descriptions <bool>]  # disable completion descriptions  (default: false)
+
+    import-dir  # Create yamlvfs document from directory
+        [--depth <int>]  # max traversal depth (-1 = unlimited)  (default: -1)
+        [--exclude-dirs <string>]  # glob patterns for directories to exclude (comma-separated)
+        [--include-dirs <string>]  # glob patterns for directories to include (comma-separated)  (default: *)
+        [--include-file-content <string>]  # glob patterns for files to read content (comma-separated)  (default: *)
+        [--no-gitignore <bool>]  # ignore .gitignore files  (default: false)
+        [--out-file <string>]  # output file (default: stdout)
+        --src-dir <string>  # source directory to scan (required)
+
+        Example:
+          yamlvfs import-dir --src-dir mydir --out-file fs.yml
+          yamlvfs import-dir --src-dir . --include-file-content=*.go --exclude-dirs=test
+          yamlvfs import-dir --src-dir . --no-gitignore
+
+    print-tree  # Print tree structure of yamlvfs file
+        --src-file <string>  # source yamlvfs file (required)
+
+        Example:
+          yamlvfs print-tree --src-file fs.yml
+
+    schema  # Export or print the embedded schema
+
+        export  # Export JSON schema to file
+            [--dest-dir <string>]  # destination directory
+            [--dest-file <string>]  # destination file path
+
+            Example:
+              yamlvfs schema export --dest-dir .
+              yamlvfs schema export --dest-file my-schema.json
+
+        print  # Print JSON schema to stdout
+
+            Example:
+              yamlvfs schema print
+
+    validate  # Validate yamlvfs file structure
+        --src-file <string>  # source yamlvfs file (required)
+
+        Example:
+          yamlvfs validate --src-file fs.yml
+
+    write-dir  # Create directory and file structure from yamlvfs file
+        --dest-dir <string>  # destination directory (required)
+        --src-file <string>  # source yamlvfs file (required)
+
+        Example:
+          yamlvfs write-dir --src-file fs.yml --dest-dir out
+
 ```
 
 ## License
