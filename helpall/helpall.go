@@ -1,4 +1,45 @@
-// Package helpall provides a --help-all flag for Cobra CLI applications.
+// Package helpall adds a --help-all flag to Cobra CLI applications that displays
+// a complete command reference showing all commands, subcommands, and flags.
+//
+// # Basic Usage
+//
+// Call Install on your root command before Execute:
+//
+//	func main() {
+//	    root := &cobra.Command{Use: "myapp", Short: "My application"}
+//	    root.AddCommand(subCmd1, subCmd2)
+//	    helpall.Install(root)
+//	    root.Execute()
+//	}
+//
+// Users can then run:
+//
+//	myapp --help-all
+//
+// # Custom Templates
+//
+// You can provide a custom template using WithTemplate:
+//
+//	helpall.Install(root, helpall.WithTemplate(myTemplate))
+//
+// Use DefaultTemplate as a starting point for customization:
+//
+//	base := helpall.DefaultTemplate()
+//	custom := strings.Replace(base, "Usage:", "Commands:", 1)
+//	helpall.Install(root, helpall.WithTemplate(custom))
+//
+// # Template Functions
+//
+// The following functions are available in templates:
+//
+//   - indent(n int) string - returns n spaces
+//   - add(a, b int) int - returns a + b
+//   - mul(a, b int) int - returns a * b
+//   - prefixLines(n int, s string) string - indents each line of s by n spaces
+//   - visibleCommands(cmd) []*cobra.Command - returns visible subcommands
+//   - visibleFlags(cmd) []*pflag.Flag - returns visible flags (excludes help flags)
+//   - isRequired(flag) bool - returns true if flag is marked required
+//   - dict(pairs ...any) map[string]any - creates a map from key/value pairs
 package helpall
 
 import (
@@ -10,21 +51,49 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// Install adds --help-all to the root command.
-func Install(root *cobra.Command) {
+// Option configures [Install] behavior.
+type Option func(*options)
+
+type options struct {
+	template string
+}
+
+// WithTemplate sets a custom Go text/template for the help-all output.
+// The template receives the root [*cobra.Command] as its data.
+// See package documentation for available template functions.
+func WithTemplate(t string) Option {
+	return func(o *options) {
+		o.template = t
+	}
+}
+
+// DefaultTemplate returns the default template string.
+// Use this as a starting point when creating custom templates.
+func DefaultTemplate() string {
+	return defaultTmpl
+}
+
+// Install adds a --help-all persistent flag to root and configures the help
+// system to display a complete command reference when the flag is set.
+func Install(root *cobra.Command, opts ...Option) {
+	o := &options{template: defaultTmpl}
+	for _, opt := range opts {
+		opt(o)
+	}
+
 	root.PersistentFlags().Bool("help-all", false, "Show full command reference")
 
 	orig := root.HelpFunc()
 	root.SetHelpFunc(func(cmd *cobra.Command, args []string) {
 		if v, _ := cmd.Flags().GetBool("help-all"); v {
-			printAll(root)
+			printAll(root, o.template)
 			return
 		}
 		orig(cmd, args)
 	})
 }
 
-func printAll(root *cobra.Command) {
+func printAll(root *cobra.Command, tmpl string) {
 	t := template.Must(template.New("").Funcs(funcs).Parse(tmpl))
 	t.Execute(os.Stdout, root)
 }
@@ -65,7 +134,7 @@ var funcs = template.FuncMap{
 	},
 }
 
-const tmpl = `{{ .Name }}{{ with .Short }} - {{ . }}{{ end }}
+const defaultTmpl = `{{ .Name }}{{ with .Short }} - {{ . }}{{ end }}
 {{ with .Long }}
 {{ . }}
 {{ end }}
