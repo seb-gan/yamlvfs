@@ -3,20 +3,18 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/seb-gan/yamlvfs.svg)](https://pkg.go.dev/github.com/seb-gan/yamlvfs)
 [![Go Report Card](https://goreportcard.com/badge/github.com/seb-gan/yamlvfs)](https://goreportcard.com/report/github.com/seb-gan/yamlvfs)
 
-Define virtual filesystem layouts using YAML.
+`yamlvfs` is a schema, a Go library, and a CLI.
 
-`yamlvfs` is three things built around one idea:
+The schema specifies a format that allows describing a virtual filesystem using YAML.
+The library provides functions for loading a yamlvfs document into a standard `fs.FS` implementation.
+The CLI provides commands for importing and exporting yamlvfs documents.
 
-1. **A YAML format** for representing filesystem trees
-2. **A Go library** that loads yamlvfs documents as standard `fs.FS` implementation
-3. **A CLI** to generate, inspect, and validate yamlvfs documents
+## YAMLVFS Format
 
-## YAML format
+The yamlvfs format must comply with `yamlvfs.schema.json`. Each key represents either a directory or a file:
 
-The format is defined in schema  `yamlvfs.schema.json`, which specifies only 2 types of nodes:
-
-- **Directories**: Must end with `/`. The value can either none or one or more directories and/or files.
-- **Files**: The value can either be none or a (multiline) string value.
+- **Directories**: Key ends with `/`. Value can be empty or contain nested entries.
+- **Files**: Key does not end with `/`. Value can be empty or a string.
 
 ```yaml
 data/:
@@ -72,20 +70,6 @@ See https://github.com/seb-gan/yamlvfs for more information.
 Usage:
 
 yamlvfs
-
-    completion # Generate the autocompletion script for the specified shell
-
-        bash # Generate the autocompletion script for bash
-            [--no-descriptions <bool>]  # disable completion descriptions
-
-        fish # Generate the autocompletion script for fish
-            [--no-descriptions <bool>]  # disable completion descriptions
-
-        powershell # Generate the autocompletion script for powershell
-            [--no-descriptions <bool>]  # disable completion descriptions
-
-        zsh # Generate the autocompletion script for zsh
-            [--no-descriptions <bool>]  # disable completion descriptions
 
     import-dir # Create yamlvfs document from directory
         [--depth <int>]  # max traversal depth (-1 = unlimited) (default: -1)
