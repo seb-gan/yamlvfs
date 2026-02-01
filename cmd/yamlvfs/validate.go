@@ -9,21 +9,21 @@ import (
 
 var validateCmd = &cobra.Command{
 	Use:     "validate",
-	Short:   "Validate yamlvfs file structure",
-	Example: "  yamlvfs validate --src-file fs.yml",
+	Short:   "Validate yamlvfs file",
+	Example: "  yamlvfs validate --file input.yml",
 	RunE:    runValidate,
 }
 
 func init() {
 	f := validateCmd.Flags()
-	f.String("src-file", "", "source yamlvfs file (required)")
-	validateCmd.MarkFlagRequired("src-file")
+	f.StringP("file", "f", "", "yamlvfs file (required)")
+	validateCmd.MarkFlagRequired("file")
 }
 
 func runValidate(cmd *cobra.Command, args []string) error {
-	srcFile, _ := cmd.Flags().GetString("src-file")
+	file, _ := cmd.Flags().GetString("file")
 
-	node, err := yamlvfs.ParseFile(srcFile)
+	node, err := yamlvfs.ParseFile(file)
 	if err != nil {
 		return err
 	}

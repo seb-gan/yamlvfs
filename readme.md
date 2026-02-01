@@ -47,11 +47,8 @@ yaml := yamlvfs.Format(node)
 
 ## CLI
 
-**Usage:**
-
 ```bash
 go install github.com/seb-gan/yamlvfs/cmd/yamlvfs@latest
-yamlvfs --help-all
 ```
 
 ```txt
@@ -65,17 +62,14 @@ Usage:
 
 yamlvfs
 
-    import-dir # Create yamlvfs document from directory
-        [--depth <int>]  # max traversal depth (-1 = unlimited) (default: -1)
-        [--exclude-dirs <string>]  # glob patterns for directories to exclude (comma-separated)
-        [--include-dirs <string>]  # glob patterns for directories to include (comma-separated) (default: *)
-        [--include-file-content <string>]  # glob patterns for files to read content (comma-separated) (default: *)
+    from-dir # Create yamlvfs document from directory
+        [--depth <int>]  # max depth (-1 = unlimited) (default: -1)
+        --dir <string>  # directory to scan (required)
+        [--exclude-dirs <string>]  # glob patterns to exclude (comma-separated)
+        [--include-content <string>]  # glob patterns for file content (comma-separated) (default: *)
+        [--include-dirs <string>]  # glob patterns for directories (comma-separated) (default: *)
         [--no-gitignore <bool>]  # ignore .gitignore files
-        [--out-file <string>]  # output file (default: stdout)
-        --src-dir <string>  # source directory to scan (required)
-
-    print-tree # Print tree structure of yamlvfs file
-        --src-file <string>  # source yamlvfs file (required)
+        [--out <string>]  # output file (default: stdout)
 
     schema # Export or print the embedded schema
 
@@ -85,12 +79,17 @@ yamlvfs
 
         print # Print JSON schema to stdout
 
-    validate # Validate yamlvfs file structure
-        --src-file <string>  # source yamlvfs file (required)
+    to-dir # Write yamlvfs document to directory
+        --file <string>  # yamlvfs file (required)
+        --out <string>  # output directory (required)
 
-    write-dir # Create directory and file structure from yamlvfs file
-        --dest-dir <string>  # destination directory (required)
-        --src-file <string>  # source yamlvfs file (required)
+    tree # Print tree structure of yamlvfs file
+        --file <string>  # yamlvfs file (required)
+
+    validate # Validate yamlvfs file
+        --file <string>  # yamlvfs file (required)
+
+
 ```
 
 ## License

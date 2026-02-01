@@ -17,9 +17,9 @@ See https://github.com/seb-gan/yamlvfs for more information.`,
 	}
 
 	root.AddCommand(
-		importDirCmd,
-		writeDirCmd,
-		printTreeCmd,
+		fromDirCmd,
+		toDirCmd,
+		treeCmd,
 		validateCmd,
 		schemaCmd,
 	)

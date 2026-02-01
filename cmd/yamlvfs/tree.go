@@ -10,23 +10,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var printTreeCmd = &cobra.Command{
-	Use:     "print-tree",
+var treeCmd = &cobra.Command{
+	Use:     "tree",
 	Short:   "Print tree structure of yamlvfs file",
-	Example: "  yamlvfs print-tree --src-file fs.yml",
-	RunE:    runPrintTree,
+	Example: "  yamlvfs tree --file input.yml",
+	RunE:    runTree,
 }
 
 func init() {
-	f := printTreeCmd.Flags()
-	f.String("src-file", "", "source yamlvfs file (required)")
-	printTreeCmd.MarkFlagRequired("src-file")
+	f := treeCmd.Flags()
+	f.StringP("file", "f", "", "yamlvfs file (required)")
+	treeCmd.MarkFlagRequired("file")
 }
 
-func runPrintTree(cmd *cobra.Command, args []string) error {
-	srcFile, _ := cmd.Flags().GetString("src-file")
+func runTree(cmd *cobra.Command, args []string) error {
+	file, _ := cmd.Flags().GetString("file")
 
-	node, err := yamlvfs.ParseFile(srcFile)
+	node, err := yamlvfs.ParseFile(file)
 	if err != nil {
 		return err
 	}
