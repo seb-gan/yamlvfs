@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/seb-gan/yamlvfs/helpall"
+	helpall "github.com/seb-gan/cobra-helpall"
 	"github.com/spf13/cobra"
 )
 

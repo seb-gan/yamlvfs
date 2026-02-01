@@ -4,6 +4,7 @@ go 1.23.0
 
 require (
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
+	github.com/seb-gan/cobra-helpall v0.0.0-20260201115355-c66a3a12ae86
 	github.com/spf13/cobra v1.10.2
 	gopkg.in/yaml.v3 v3.0.1
 )
