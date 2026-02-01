@@ -24,7 +24,7 @@ func init() {
 	f.String("include-content", "*", "glob patterns for file content (comma-separated)")
 	f.String("include-dirs", "*", "glob patterns for directories (comma-separated)")
 	f.String("exclude-dirs", "", "glob patterns to exclude (comma-separated)")
-	f.Bool("no-gitignore", false, "ignore .gitignore files")
+	f.Bool("no-gitignore", false, "do not skip .gitignore paths")
 	fromDirCmd.MarkFlagRequired("dir")
 }
 

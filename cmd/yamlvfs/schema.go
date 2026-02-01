@@ -12,23 +12,19 @@ import (
 var schemaCmd = &cobra.Command{
 	Use:   "schema",
 	Short: "Export or print the embedded schema",
-	Long:  `Export or print the embedded JSON schema for yamlvfs documents.`,
 }
 
 var schemaExportCmd = &cobra.Command{
 	Use:     "export",
 	Short:   "Export JSON schema to file",
-	Long:    `Export the embedded JSON schema to a file or directory.`,
 	Example: "  yamlvfs schema export --dest-dir .\n  yamlvfs schema export --dest-file my-schema.json",
 	RunE:    runSchemaExport,
 }
 
 var schemaPrintCmd = &cobra.Command{
-	Use:     "print",
-	Short:   "Print JSON schema to stdout",
-	Long:    `Print the embedded JSON schema to stdout.`,
-	Example: "  yamlvfs schema print",
-	RunE:    runSchemaPrint,
+	Use:   "print",
+	Short: "Print JSON schema to stdout",
+	RunE:  runSchemaPrint,
 }
 
 func init() {

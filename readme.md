@@ -68,7 +68,7 @@ yamlvfs
         [--exclude-dirs <string>]  # glob patterns to exclude (comma-separated)
         [--include-content <string>]  # glob patterns for file content (comma-separated) (default: *)
         [--include-dirs <string>]  # glob patterns for directories (comma-separated) (default: *)
-        [--no-gitignore <bool>]  # ignore .gitignore files
+        [--no-gitignore <bool>]  # do not skip .gitignore paths
         [--out <string>]  # output file (default: stdout)
 
     schema # Export or print the embedded schema

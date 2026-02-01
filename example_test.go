@@ -10,81 +10,119 @@ import (
 
 func ExampleParse() {
 	node, err := yamlvfs.Parse(`
-src/:
+cmd/:
   main.go: |
     package main
-config.yml: |
-  port: 8080
+
+    func main() {
+        println("hello")
+    }
+internal/:
+  util.go: |
+    package internal
+
+    func Add(a, b int) int {
+        return a + b
+    }
+go.mod: |
+  module example.com/myapp
+
+  go 1.23
 `)
 	if err != nil {
 		panic(err)
 	}
 
 	fsys, _ := yamlvfs.Open(node)
-	data, _ := fs.ReadFile(fsys, "config.yml")
+
+	data, _ := fs.ReadFile(fsys, "go.mod")
 	fmt.Print(string(data))
 
 	// Output:
-	// port: 8080
+	// module example.com/myapp
+	//
+	// go 1.23
 }
 
 func ExampleOpen() {
 	node, _ := yamlvfs.Parse(`
-src/:
-  main.go:
-  util.go:
+cmd/:
+  main.go: |
+    package main
+  cli/:
+    root.go: |
+      package cli
+    help.go: |
+      package cli
+internal/:
+  util.go: |
+    package internal
+go.mod: module example
 `)
 
 	fsys, _ := yamlvfs.Open(node)
-	entries, _ := fs.ReadDir(fsys, "src")
+
+	entries, _ := fs.ReadDir(fsys, "cmd/cli")
 	for _, e := range entries {
 		fmt.Println(e.Name())
 	}
 
 	// Output:
-	// main.go
-	// util.go
+	// help.go
+	// root.go
 }
 
 func ExampleFormat() {
 	fsys := fstest.MapFS{
-		"main.go": {Data: []byte("package main")},
-		"go.mod":  {Data: []byte("module example")},
+		"cmd/main.go":      {Data: []byte("package main")},
+		"internal/util.go": {Data: []byte("package internal")},
+		"go.mod":           {Data: []byte("module example")},
+		"README.md":        {Data: []byte("# Example")},
 	}
 
 	node, _ := yamlvfs.FromFS(fsys, nil)
 	fmt.Print(yamlvfs.Format(node))
 
 	// Output:
+	// README.md: '# Example'
+	// cmd/:
+	//     main.go: package main
 	// go.mod: module example
-	// main.go: package main
+	// internal/:
+	//     util.go: package internal
 }
 
 func ExampleFromFS() {
 	fsys := fstest.MapFS{
-		"src/main.go": {Data: []byte("package main")},
-		"README.md":   {Data: []byte("# Hello")},
+		"src/main.go":    {Data: []byte("package main")},
+		"src/handler.go": {Data: []byte("package main")},
+		"docs/api.md":    {Data: []byte("# API")},
+		"README.md":      {Data: []byte("# Project")},
 	}
 
 	node, _ := yamlvfs.FromFS(fsys, nil)
 	fmt.Print(yamlvfs.Format(node))
 
 	// Output:
-	// README.md: '# Hello'
+	// README.md: '# Project'
+	// docs/:
+	//     api.md: '# API'
 	// src/:
+	//     handler.go: package main
 	//     main.go: package main
 }
 
 func ExampleFromFS_options() {
 	fsys := fstest.MapFS{
-		"main.go":    {Data: []byte("package main")},
-		"secret.key": {Data: []byte("supersecret")},
+		"cmd/main.go":      {Data: []byte("package main")},
+		"internal/util.go": {Data: []byte("package internal")},
+		"assets/logo.png":  {Data: []byte{0x89, 0x50, 0x4E, 0x47}},
+		"go.mod":           {Data: []byte("module example")},
 	}
 
-	// Only include content from .go files
 	opts := &yamlvfs.Options{
 		Depth:              -1,
-		IncludeFileContent: []string{"*.go"},
+		IncludeFileContent: []string{"*.go", "go.mod"},
 		IncludeDirs:        []string{"*"},
 		RespectGitignore:   false,
 	}
@@ -93,19 +131,32 @@ func ExampleFromFS_options() {
 	fmt.Print(yamlvfs.Format(node))
 
 	// Output:
-	// main.go: package main
-	// secret.key:
+	// assets/:
+	//     logo.png:
+	// cmd/:
+	//     main.go: package main
+	// go.mod: module example
+	// internal/:
+	//     util.go: package internal
 }
 
 func ExampleValidate() {
-	// Valid
-	node, _ := yamlvfs.Parse(`src/:`)
-	err := yamlvfs.Validate(node)
+	valid, _ := yamlvfs.Parse(`
+src/:
+  main.go: |
+    package main
+  util.go:
+data/:
+config.yml: |
+  port: 8080
+`)
+	err := yamlvfs.Validate(valid)
 	fmt.Println("valid:", err == nil)
 
-	// Invalid: directory cannot have string content
-	node, _ = yamlvfs.Parse(`src/: invalid`)
-	err = yamlvfs.Validate(node)
+	invalid, _ := yamlvfs.Parse(`
+src/: should be null or mapping
+`)
+	err = yamlvfs.Validate(invalid)
 	fmt.Println("invalid:", err != nil)
 
 	// Output:

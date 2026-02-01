@@ -15,7 +15,7 @@ type Options struct {
 	IncludeFileContent []string // Glob patterns for files to read content
 	IncludeDirs        []string // Glob patterns for directories to include
 	ExcludeDirs        []string // Glob patterns for directories to exclude
-	RespectGitignore   bool     // Honor .gitignore files
+	RespectGitignore   bool     // Skip paths matched by .gitignore files
 }
 
 // DefaultOptions returns default options for FromFS.
@@ -68,9 +68,6 @@ func FromFS(fsys fs.FS, opts *Options) (*yaml.Node, error) {
 		// Check gitignore
 		if opts.RespectGitignore {
 			dir := filepath.Dir(path)
-			if dir == "." {
-				dir = "."
-			}
 			if gi := gitignores[filepath.ToSlash(dir)]; gi != nil && gi.matches(path, d.IsDir()) {
 				if d.IsDir() {
 					return fs.SkipDir
