@@ -59,9 +59,10 @@ entries, _ := fs.ReadDir(fsys, "src")
 
 ```bash
 go install github.com/seb-gan/yamlvfs/cmd/yamlvfs@latest
-
 yamlvfs --help-all
 ```
+
+```txt
 yamlvfs - Work with yamlvfs YAML filesystems
 
 yamlvfs is a CLI for working with YAML-defined virtual filesystems.
