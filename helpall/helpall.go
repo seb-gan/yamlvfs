@@ -58,22 +58,18 @@ var funcs = template.FuncMap{
 }
 
 const tmpl = `{{ .Name }}
-{{ range $cmd := visibleCommands . }}{{ template "cmd" (dict "Cmd" $cmd "Depth" 0) }}{{ end }}
+{{ range $cmd := visibleCommands . }}
+{{ template "cmd" (dict "Cmd" $cmd "Depth" 0) }}{{ end }}
 {{- define "cmd" -}}
-{{ indent (add (mul .Depth 4) 4) }}{{ .Cmd.Name }}{{ with .Cmd.Short }} # {{ . }}{{ end }}
-{{ range $f := visibleFlags .Cmd }}{{ template "flag" (dict "Flag" $f "Depth" $.Depth) }}{{ end -}}
+{{ indent (add (mul .Depth 4) 2) }}{{ .Cmd.Name }}{{ with .Cmd.Short }}  # {{ . }}{{ end }}
+{{ range $f := visibleFlags .Cmd }}{{ template "flag" (dict "Flag" $f "Depth" $.Depth) }}
+{{ end -}}
 {{ range $c := visibleCommands .Cmd }}{{ template "cmd" (dict "Cmd" $c "Depth" (add $.Depth 1)) }}{{ end -}}
 {{ end -}}
 {{- define "flag" -}}
-{{ $indent := add (mul .Depth 4) 8 -}}
-{{ if isRequired .Flag }}{{ indent $indent }}--{{ .Flag.Name }} <{{ .Flag.Value.Type }}>
-{{ else }}{{ indent $indent }}[--{{ .Flag.Name }} <{{ .Flag.Value.Type }}>]
-{{ end -}}
-{{ with .Flag.Usage }}{{ indent (add $indent 4) }}# {{ . }}
-{{ end -}}
-{{ with .Flag.DefValue }}{{ indent (add $indent 4) }}default {{ printf "%q" . }}
-{{ end -}}
-{{ end -}}
+{{ $indent := add (mul .Depth 4) 6 -}}
+{{ indent $indent }}{{ if isRequired .Flag }}--{{ .Flag.Name }} <{{ .Flag.Value.Type }}>{{ else }}[--{{ .Flag.Name }} <{{ .Flag.Value.Type }}>]{{ end }}{{ with .Flag.Usage }}  # {{ . }}{{ end }}{{ with .Flag.DefValue }}  (default: {{ . }}){{ end }}
+{{- end -}}
 `
 
 func init() {
