@@ -11,10 +11,10 @@ The CLI provides commands for importing and exporting yamlvfs documents.
 
 ## YAMLVFS Format
 
-The yamlvfs format must comply with `yamlvfs.schema.json`. Each key represents either a directory or a file:
+The yamlvfs format must comply with [`yamlvfs.schema.json`](yamlvfs.schema.json). The document is a YAML mapping where each key-value pair represents a filesystem entry:
 
-- **Directories**: Key ends with `/`. Value can be empty or contain nested entries.
-- **Files**: Key does not end with `/`. Value can be empty or a string.
+- **Directory**: Key ends with `/`. Value is either null or a mapping containing nested entries.
+- **File**: Key does not end with `/`. Value is either null or a string scalar.
 
 ```yaml
 data/:
