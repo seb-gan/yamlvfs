@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/seb-gan/yamlvfs/helpall"
 	"github.com/spf13/cobra"
 )
 
@@ -19,6 +20,8 @@ func main() {
 		validateCmd,
 		schemaCmd,
 	)
+
+	helpall.Install(root)
 
 	if err := root.Execute(); err != nil {
 		os.Exit(1)
